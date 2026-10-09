@@ -59,6 +59,10 @@ def copy_dataset_with_random_names(
         shutil.copy2(source_path, target_path)
         copied_paths.append(target_path)
         labels[target_path] = get_class_label(source_path, source_dataset_dir)
+
+    copied_paths.sort(
+        key=lambda path: int(path.stem.rsplit("_", maxsplit=1)[-1])
+    )
     return write_annotation(copied_paths, project_dir, annotation_path, labels.__getitem__)
 
 
