@@ -7,7 +7,11 @@ import flet as ft
 
 from annotation import create_dataset_annotation
 from class_named_copy import copy_dataset_with_class_names
-from next_instance import get_next_annotated_instance, reset_instance_sequence
+from next_instance import (
+    get_next_annotated_instance,
+    reset_annotated_instance_sequence,
+    reset_instance_sequence,
+)
 from random_named_copy import copy_dataset_with_random_names
 
 
@@ -152,11 +156,49 @@ def main(page: ft.Page) -> None:
             show_status(f"Не удалось получить следующий экземпляр: {error}", True)
             return
 
+        
         if returned_path is None:
-            clear_preview(
-                f"Экземпляры класса «{class_label}» закончились."
+            message = f"Экземпляры класса «{class_label}» закончились."
+
+            clear_preview(message)
+            show_status(message)
+
+            def restart_iterator(event: ft.ControlEvent) -> None:
+                """Закрывает диалог и начинает просмотр с первого изображения."""
+                page.pop_dialog()
+
+                reset_annotated_instance_sequence(
+                    class_label,
+                    annotation_path,
+                )
+
+                show_next_instance(class_label)
+
+            def close_dialog(event: ft.ControlEvent) -> None:
+                """Закрывает диалог без сброса итератора."""
+                page.pop_dialog()
+
+            page.show_dialog(
+                ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("Изображения закончились"),
+                    content=ft.Text(
+                        "Обнулить итератор и начать просмотр сначала?"
+                    ),
+                    actions=[
+                        ft.TextButton(
+                            content="Да",
+                            on_click=restart_iterator,
+                        ),
+                        ft.TextButton(
+                            content="Нет",
+                            on_click=close_dialog,
+                        ),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
             )
-            show_status(f"Экземпляры класса «{class_label}» закончились.")
+
             return
 
         try:

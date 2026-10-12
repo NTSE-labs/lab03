@@ -50,6 +50,13 @@ def reset_instance_sequence(class_label: str | None = None, dataset_dir: Path | 
         raise ValueError("Для сброса одного класса укажите и class_label, и dataset_dir.")
     _iterators.pop((dataset_dir.resolve(), class_label), None)
 
+def reset_annotated_instance_sequence(
+    class_label: str,
+    annotation_path: Path,
+) -> None:
+    """Сбрасывает итератор изображений одного класса из CSV-аннотации."""
+    key = (annotation_path.resolve(), class_label)
+    _annotation_iterators.pop(key, None)
 
 def get_next_instance(class_label: str, dataset_dir: Path) -> Path | None:
     """Возвращает следующий неповторяющийся путь класса или ``None``."""
